@@ -1,91 +1,80 @@
+<?php require_once('config.php'); ?>
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <style>
-        .wrapper {
-            width: 600px;
-            margin: 0 auto;
-        }
-
-        table tr td:last-child {
-            width: 120px;
-        }
-    </style>
-    <script>
-        $(document).ready(function() {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-    </script>
-</head>
-
+<?php require_once('inc/header.php') ?>
 <body>
-    <div class="wrapper">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mt-5 mb-3 clearfix">
-                        <h2 class="pull-left">Player Details</h2>
-                        <a href="create.php" class="btn btn-success pull-right"><i class="fa fa-plus"></i> Add New player</a>
-                    </div>
-                    <?php
-                    // Include config file
-                    require_once "config.php";
+<?php $page = isset($_GET['p']) ? $_GET['p'] : 'home';  ?>
+<?php require_once('inc/topBarNav.php') ?>
+     <?php if($_settings->chk_flashdata('success')): ?>
+      <script>
+        alert_toast("<?php echo $_settings->flashdata('success') ?>",'success')
+      </script>
+<?php endif;?>
+<?php 
+    if(!file_exists($page.".php") && !is_dir($page)){
+        include '404.html';
+    }else{
+      if(is_dir($page))
+        include $page.'/index.php';
+      else
+        include $page.'.php';
+    }
+?>
+<?php require_once('inc/footer.php') ?>
 
-                    // Attempt select query execution
-                    $sql = "SELECT * FROM playerrecords";
-                    if ($result = mysqli_query($link, $sql)) {
-                        if (mysqli_num_rows($result) > 0) {
-                            echo '<table class="table table-bordered table-striped">';
-                            echo "<thead>";
-                            echo "<tr>";
-                            echo "<th>#</th>";
-                            echo "<th>playerid</th>";
-                            echo "<th>playername</th>";
-                            echo "<th>dateofbirth</th>";
-                            echo "<th>team</th>";
-                            echo "</tr>";
-                            echo "</thead>";
-                            echo "<tbody>";
-                            while ($row = mysqli_fetch_array($result)) {
-                                echo "<tr>";
-                                echo "<td>" . $row['id'] . "</td>";
-                                echo "<td>" . $row['playerid'] . "</td>";
-                                echo "<td>" . $row['playername'] . "</td>";
-                                echo "<td>" . $row['dateofbirth'] . "</td>";
-                                echo "<td>" . $row['team'] . "</td>";
-                                echo "<td>";
-                                echo '<a href="read.php?id=' . $row['id'] . '" class="mr-3" title="View Record" data-toggle="tooltip"><span class="fa fa-eye"></span></a>';
-                                echo '<a href="update.php?id=' . $row['id'] . '" class="mr-3" title="Update Record" data-toggle="tooltip"><span class="fa fa-pencil"></span></a>';
-                                echo '<a href="delete.php?id=' . $row['id'] . '" title="Delete Record" data-toggle="tooltip"><span class="fa fa-trash"></span></a>';
-                                echo "</td>";
-                                echo "</tr>";
-                            }
-                            echo "</tbody>";
-                            echo "</table>";
-                            // Free result set
-                            mysqli_free_result($result);
-                        } else {
-                            echo '<div class="alert alert-danger"><em>No records were found.</em></div>';
-                        }
-                    } else {
-                        echo "Oops! Something went wrong. Please try again later.";
-                    }
-
-                    // Close connection
-                    mysqli_close($link);
-                    ?>
-                </div>
-            </div>
-        </div>
+  <div class="modal fade" id="uni_modal" role='dialog'>
+    <div class="modal-dialog   rounded-0 modal-md modal-dialog-centered" role="document">
+      <div class="modal-content  rounded-0">
+        <div class="modal-header">
+        <h5 class="modal-title"></h5>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id='submit' onclick="$('#uni_modal form').submit()">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+      </div>
     </div>
-</body>
+  </div>
+  <div class="modal fade" id="uni_modal_right" role='dialog'>
+    <div class="modal-dialog  rounded-0 modal-full-height  modal-md" role="document">
+      <div class="modal-content rounded-0">
+        <div class="modal-header">
+        <h5 class="modal-title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span class="fa fa-arrow-right"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+      </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="viewer_modal" role='dialog'>
+    <div class="modal-dialog modal-md" role="document">
+      <div class="modal-content">
+              <button type="button" class="btn-close" data-dismiss="modal"><span class="fa fa-times"></span></button>
+              <img src="" alt="">
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="confirm_modal" role='dialog'>
+    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title">Confirmation</h5>
+      </div>
+      <div class="modal-body">
+        <div id="delete_content"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id='confirm' onclick="">Continue</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+      </div>
+    </div>
+  </div>
 
+</body>
 </html>
